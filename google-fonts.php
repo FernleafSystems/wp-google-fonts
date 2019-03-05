@@ -2,7 +2,7 @@
 /* 
 Plugin Name: WP Google Fonts
 Plugin URI: http://adrian3.com/projects/wordpress-plugins/wordpress-google-fonts-plugin/
-Version: v3.1.4
+Version: 3.2.0
 Description: The Wordpress Google Fonts Plugin makes it even easier to add and customize Google fonts on your site through Wordpress. 
 Author: Noah Kagan
 Author URI: http://SumoMe.com/
@@ -144,9 +144,9 @@ if (!class_exists('googlefonts')) {
             load_textdomain($this->localizationDomain, $mo);
 
             //"Constants" setup
-            $this->thispluginurl = WP_PLUGIN_URL . '/' . dirname(plugin_basename(__FILE__)).'/';
-            $this->thispluginpath = WP_PLUGIN_DIR . '/' . dirname(plugin_basename(__FILE__)).'/';
-            
+			$this->thispluginurl = WP_PLUGIN_URL.'/'.dirname( plugin_basename( __FILE__ ) ).'/';
+			$this->thispluginpath = WP_PLUGIN_DIR.'/'.dirname( plugin_basename( __FILE__ ) ).'/';
+
             //Initialize the options
             //This is REQUIRED to initialize the options when the plugin is loaded!
             $this->getOptions();
@@ -156,18 +156,18 @@ if (!class_exists('googlefonts')) {
 			
 			//Convert the options from pre v3.0 array
 			$this->gf_convert_fonts();
-			
-            //Actions        
-            add_action("admin_menu", array(&$this,"admin_menu_link"));
-            add_action('admin_enqueue_scripts',array(&$this,'gf_admin_scripts'));
-			
-			add_action('wp_enqueue_scripts',array(&$this, 'googlefontsstart'));
-			add_action("wp_head", array(&$this,"addgooglefontscss")); 
+
+            //Actions
+            add_action("admin_menu", array($this,"admin_menu_link"));
+            add_action('admin_enqueue_scripts',array($this,'gf_admin_scripts'));
+
+			add_action('wp_enqueue_scripts',array($this, 'googlefontsstart'));
+			add_action("wp_head", array($this,"addgooglefontscss"));
 
 			add_action('wp_ajax_googlefont_action', array($this, 'googlefont_action_callback'));
-			add_action( 'admin_notices', array(&$this, 'global_notice') );
+			add_action( 'admin_notices', array($this, 'global_notice') );
 			add_option('wp_google_fonts_global_notification', 1);
-			register_deactivation_hook( __FILE__, array(&$this, 'gf_plugin_deactivate') );
+			register_deactivation_hook( __FILE__, array($this, 'gf_plugin_deactivate') );
 
         }
 
@@ -322,8 +322,8 @@ if (!class_exists('googlefonts')) {
 		
 		function gf_get_local_fonts(){
 			$fonts = null;
-			
-			include $this->gf_fonts_file;
+
+			include( dirname( __FILE__ ).'/'.$this->gf_fonts_file );
 
 			if($fonts){
 				$this->gf_notices[] = __("Using the local font list file because we could not connect with Google.", $this->localizationDomain);
@@ -771,7 +771,6 @@ if (!class_exists('googlefonts')) {
 
         /**
         * Retrieves the plugin options from the database.
-        * @return array
         */
         function getOptions() {
             //Don't forget to set up the default options
@@ -881,9 +880,7 @@ if (!class_exists('googlefonts')) {
             //There is no return here, because you should use the $this->options variable!!!
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
-		
-		
-		
+
 		/* convert fonts in old options variable to new array variable */
 		function gf_convert_fonts(){
 			$converted = false;
@@ -981,11 +978,11 @@ if (!class_exists('googlefonts')) {
         function admin_menu_link() {
             //If you change this from add_options_page, MAKE SURE you change the filter_plugin_actions function (below) to
             //reflect the page filename (ie - options-general.php) of the page your plugin is under!
-        	add_menu_page( 'Google Fonts', 'Google Fonts', 'manage_options', 'google-fonts', array(&$this,'admin_options_page') , 'dashicons-editor-textcolor');
-			add_submenu_page( 'google-fonts', 'Other Plugins', 'Other Plugins', 'manage_options', 'gf-plugin-other-plugins', array(&$this,'other_plugins_page'));
+        	add_menu_page( 'Google Fonts', 'Google Fonts', 'manage_options', 'google-fonts', array($this,'admin_options_page') , 'dashicons-editor-textcolor');
+			add_submenu_page( 'google-fonts', 'Other Plugins', 'Other Plugins', 'manage_options', 'gf-plugin-other-plugins', array($this,'other_plugins_page'));
 
-            //add_options_page('Google Fonts', 'Google Fonts', 'manage_options', basename(__FILE__), array(&$this,'admin_options_page'));
-            add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), array(&$this, 'filter_plugin_actions'), 10, 2 );
+            //add_options_page('Google Fonts', 'Google Fonts', 'manage_options', basename(__FILE__), array($this,'admin_options_page'));
+            add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), array($this, 'filter_plugin_actions'), 10, 1 );
         }
 
         function global_notice() {
@@ -1006,7 +1003,7 @@ if (!class_exists('googlefonts')) {
 		}
 
 		function other_plugins_page() {
-			include(plugin_dir_path( __FILE__ ).'/other_plugins.php');
+			include(dirname( __FILE__ ).'/other_plugins.php');
 		}
 
 
@@ -1014,11 +1011,12 @@ if (!class_exists('googlefonts')) {
 			delete_option('wp_google_fonts_global_notification');
 		}
 
-        
-        /**
-        * @desc Adds the Settings link to the plugin activate/deactivate page
-        */
-        function filter_plugin_actions($links, $file) {
+		/**
+		 * @desc Adds the Settings link to the plugin activate/deactivate page
+		 * @param array $links
+		 * @return array
+		 */
+        function filter_plugin_actions($links) {
            //If your plugin is under a different top-level menu than Settiongs (IE - you changed the function above to something other than add_options_page)
            //Then you're going to want to change options-general.php below to the name of your top-level page
            $settings_link = '<a href="admin.php?page=google-fonts">' . __('Settings') . '</a>';
@@ -1026,11 +1024,13 @@ if (!class_exists('googlefonts')) {
 
            return $links;
         }
-        
+
 		function gf_handle_submission($data){
-			if (! wp_verify_nonce($_POST['_wpnonce'], 'googlefonts-update-options') ) die(__('Whoops! There was a problem with the data you posted. Please go back and try again.', $this->localizationDomain)); 
-			
-			if(is_array($data)){
+			if ( !isset( $_POST[ '_wpnonce' ] ) || !wp_verify_nonce( $_POST[ '_wpnonce' ], 'googlefonts-update-options' ) ) {
+				die( __( 'Whoops! There was a problem with the data you posted. Please go back and try again.', $this->localizationDomain ) );
+			}
+
+			if ( is_array( $data ) ) {
 				foreach($data as $googlefont => $options){
 					if(is_array($options) && in_array($googlefont, $this->gf_element_names)){
 						/* store the family, variants, css and usage options */

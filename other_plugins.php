@@ -1,6 +1,5 @@
  <?php add_thickbox(); ?>
  <div class="wrap">
-	<?php screen_icon(); ?>
 	<h2>Other Plugins</h2>
 	
         <p style="border:1px solid #CCCCCC;background:#FFFFFF;padding:8px;">

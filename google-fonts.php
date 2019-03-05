@@ -1080,10 +1080,10 @@ if (!class_exists('googlefonts')) {
             }
 
             add_thickbox();
-            if ($_GET['wp_google_fonts_global_notification'] == 0) {
-        		update_option('wp_google_fonts_global_notification', 0);
+			if ( isset( $_GET[ 'wp_google_fonts_global_notification' ] ) && $_GET[ 'wp_google_fonts_global_notification' ] == 0 ) {
+				update_option( 'wp_google_fonts_global_notification', 0 );
 			}
-			?>   
+			?>
 		   	<style type="text/css">
 				#wp_google_fonts_global_notification a.button:active {vertical-align:baseline;}
 			</style>                             
